@@ -8,7 +8,3 @@ export interface UserLoginObject {
   email?: string;
   error?: string;
 }
-
-export interface LoginResponse {
-  
-}

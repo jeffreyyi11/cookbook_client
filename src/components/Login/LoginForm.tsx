@@ -1,36 +1,43 @@
-import { useState } from "react";
 import loginService from "../../services/loginService";
+import {SubmitHandler, useForm} from 'react-hook-form';
+import { Link, useNavigate } from "react-router-dom";
+import { LoginDetails } from "../../types/login";
+
+const errorStyles = 'bg-red-500 text-black'
 
 const LoginForm = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const {register, handleSubmit, formState: {errors}} = useForm<LoginDetails>();
 
-  const handleUserLogin = async (event: React.SyntheticEvent) => {
-    event.preventDefault();
+  const navigate = useNavigate();
 
-    const userLogin = {email, password};
+  const userLogin: SubmitHandler<LoginDetails> = async (data) => {
+    console.log(data);
+
+    const userLogin: LoginDetails = {email: data.email, password: data.password};
     const loginResponse = await loginService.login(userLogin);
-
     console.log(loginResponse);
-
-    // if (loginResponse!.status !== 200) {
-    //   setError(loginResponse?.data.error);
-    // }
-  }
+    // window.localStorage.setItem('userToken', JSON.stringify(loginResponse.data));
+    // navigate('/home');
+  };
 
   return (
     <div className='flex flex-col items-center'>
-      <form className='space-y-4' onSubmit={handleUserLogin}>
+      <form className='space-y-4' onSubmit={handleSubmit(userLogin)}>
         <div className='w-[25rem]'>
-          <span className='font-bold'>Email</span>: <input type='email' className='p-1 border-black border-b-2 block w-full' value={email} onChange={({target}) => setEmail(target.value)} />
+          <span className='font-bold'>Email</span>: 
+          <input type='email' className='p-1 border-black border-b-2 block w-full' {...register('email', {required: true})} />
+          {errors && <p className={errorStyles}>{errors.email?.message}</p>}
         </div>
         <div className='w-[25rem]'>
-          <span className='font-bold'>Password</span>: <input type='password' className='p-1 border-black border-b-2 block w-full' value={password} onChange={({target}) => setPassword(target.value)} />
+          <span className='font-bold'>Password</span>: 
+          <input type='password' className='p-1 border-black border-b-2 block w-full' {...register('password', {required: true})} />
+          {errors && <p className={errorStyles}>{errors.password?.message}</p>}
         </div>
-        <button type='submit' className='font-bold border border-blue-500 px-4 py-1 rounded-md hover:text-white hover:bg-blue-500 hover:border-none'>Login</button>
+        <div className='flex justify-between'>
+          <button type='submit' className='font-bold border bg-blue-500 text-white px-4 py-1 rounded-md hover:text-blue-500 hover:bg-white hover:border-black'>Login</button>
+          <Link to='/' className='font-bold border bg-red-500 text-white px-4 py-1 rounded-md hover:text-red-500 hover:bg-white hover:border-black'>Cancel</Link>
+        </div>
       </form>
-      {error && <p className='text-red-600'>{error}</p>}
     </div>
   )
 }
